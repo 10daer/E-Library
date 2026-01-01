@@ -1,0 +1,36 @@
+name: No Duplicate Code Enforcement
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+
+jobs:
+  duplicate-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint (detect identical functions & logic)
+        run: npm run lint
+
+      - name: Detect duplicated code (jscpd)
+        run: |
+          npx jscpd \
+            --languages typescript,tsx \
+            --threshold 5 \
+            --min-lines 5 \
+            --reporters console \
+            src
